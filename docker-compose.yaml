@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: appcontainer
+    ports:
+      - 8080:8080
+    environment:
+      - database_url=jdbc:postgresql://database:5432/ecommerce
+      - database_username=user123
+      - database_password=user123
+    depends_on:
+      database:
+        condition: service_healthy
+
+  database:
+    image: postgres
+    container_name: postgrescontainer
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=ecommerce
+      - POSTGRES_USER=user123
+      - POSTGRES_PASSWORD=user123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user123 -d ecommerce"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+volumes:
+  postgres_data:
